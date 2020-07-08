@@ -156,7 +156,7 @@ void merge_parts(int a[],int l,int mid,int r)
             a[k]=R[j];
             j++;
         }
-        k++;x
+        k++;
     }
     while(i<n1)
     {
