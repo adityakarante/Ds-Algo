@@ -1,3 +1,2 @@
-#ignore all .o and .exe files 
 *.o
 *.exe
