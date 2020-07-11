@@ -196,6 +196,42 @@ int max_Element(node *rt)
         Max=rt->data;
     return Max;
 }
+//_________________________Zig and Zag traversal___________________
+//use 2 stacks for storing alternate levels
+//for 1st stack store left child 1st then right child
+//for 2nd stack store right child 1st then left child
+void zig_Zag(node *rt)
+{
+    if(!rt)
+        return;
+    stack<node*>s1,s2;
+    s1.push(rt);
+    node*curr;
+    cout<<"Zig Zag Traversal\n";
+    while(!s1.empty() || !s2.empty())
+    {
+        while(!s1.empty())
+        {
+            curr=s1.top();
+            cout<<curr->data<<" ";
+            s1.pop();
+            if(curr->l)
+                s2.push(curr->l);
+            if(curr->r)
+                s2.push(curr->r);
+        }
+        while (!s2.empty())
+        {
+            curr = s2.top();
+            cout << curr->data << " ";
+            s2.pop();
+            if (curr->r)
+                s1.push(curr->r);
+            if (curr->l)
+                s1.push(curr->l);
+        }
+    }
+}
 //find max without Recursion
 int max_Element_No_Recursion(node *rt)
 {
@@ -260,7 +296,7 @@ bool searchElement(node *rt,ll d)
     return ans;
 
 }
-//Size of binary tree(total no of nodes present inside binary tree)
+//_______________________Size of binary tree(total no of nodes present inside binary tree)_________________________________
 //Size with recursion
 int tree_Size(node *rt)
 {
@@ -402,8 +438,70 @@ void deep_Node(node *rt)
     cout<<endl<<"Deep node: "<<tmp->data;
 }
 //Delete node in binary tree ??????????????
-void delete_Node()
-{
+//find deppest node  and replace data of node to be deleted with deepest ndoe 
+//delete deepest node
+void delete_Node(node **rt,ll key)
+{   
+    node *curr=*rt;
+    if(!curr)
+        return;
+    queue<node*>q;
+    node *to_del,*deepest,*parent=NULL;
+    q.push(curr);
+    while(!q.empty())
+    {
+        curr=q.front();
+        q.pop();
+        if(curr->data==key)
+            to_del=curr;
+        if(curr->l)
+            q.push(curr->l);
+        if(curr->r)
+            q.push(curr->r);
+    }
+    //now last node inside tree is deepest node
+    deepest=curr;
+    //swap data of deepest and node to be deleted
+    std::swap(deepest->data,to_del->data);
+
+    //to delete deepst node
+    curr=*rt;
+    //clear queue
+    while(!q.empty())
+        q.pop();
+    
+    q.push(curr);
+    while(!q.empty())
+    {
+        curr=q.front();
+        q.pop();
+        if(curr->l)
+        {
+            if(curr->l==deepest)
+            {
+                delete deepest;
+                curr->l=NULL;
+                break;
+            }
+            else
+                q.push(curr->l);
+        }
+        if(curr->r)
+        {
+            if (curr->r== deepest)
+            {
+                delete deepest;
+                curr->r = NULL;
+                break;
+            }
+            else
+                q.push(curr->r);
+        }
+    }
+
+
+
+    
 
 
 }
@@ -465,14 +563,15 @@ ll count_Of_Half_Nodes(node *rt)
 //Check whether 2 trees have identical structure
 bool check_2_Identical(node *f,node *s)
 {
-    if(!f && !s)
+    if(!f && !s) // both are empty
         return true;
-    if(!f || !s)
+    if(!f || !s)//if one is not empty
         return false;
-    return( (f->data==s->data) &&check_2_Identical(f->l,s->r) && check_2_Identical(f->r,s->l));
+    //check data + left subtree + right subtree
+    return( (f->data==s->data) &&check_2_Identical(f->l,s->l) && check_2_Identical(f->r,s->r));
 
 }
-//Diameter of Binary tree
+//_____________________Diameter of Binary tree__________________
 ll Max_data(ll a,ll b)
 {
     return a>b ? a:b;
@@ -559,7 +658,36 @@ void print_Path(node *rt,vector<ll>&v)
     }
 
 }
-//Sum of all elements in tree
+//21)___________________path with given sum_________________________refer- https://www.youtube.com/watch?v=aYwiLCCdb-k
+//preorder traversal used
+void printStack(stack<int>s)
+{
+    cout<<"\n";
+    while(!s.empty())
+    {
+        cout<<s.top()<<" ";
+        s.pop();
+    }
+}
+void path_With_Given_Sum(node *rt,ll key)
+{
+    static stack<int>st;
+    static int sum=0;
+    if(rt)
+    {
+        sum+=rt->data;
+        st.push(rt->data);
+        if(sum==key)
+            printStack(st);
+        path_With_Given_Sum(rt->l,key);
+        path_With_Given_Sum(rt->r,key);
+        //removing added data
+        sum-=rt->data;
+        st.pop();
+    }
+
+}
+//22)Sum of all elements in tree
 ll sum_Of_All(node *rt)
 {
     if(!rt)
@@ -604,6 +732,40 @@ node* make_Mirror(node *rt)
         rt->l=rt->r;
         rt->r=tp;
     }
+    return rt;
+}
+
+//Build tree from inorder and preorder traversal
+//use map to store inorder element value and its index
+
+ll getInorder_Index(ll inorder[],ll instart,ll inend,ll data)
+{
+    ll i=instart;
+    for(;i<=inend;i++)
+        if(inorder[i]==data)
+            break;
+    return i;
+}
+
+node *build_Tree_from_Inorder_Preorder(ll inorder[],ll preorder[],ll instart,ll inend)
+{
+    static ll pre_index=0;
+    node *rt;
+    if(instart>inend)
+        return NULL;
+    //select node from preorder taraversal
+    ll data=preorder[pre_index];
+    pre_index++;
+    rt=createNode(data);
+    if(instart==inend)
+        return rt;
+    //find inorder index of this node in inorder traversal
+    ll inorder_index=getInorder_Index(inorder,instart,inend,data);
+
+    //fill right and left sub tree by inorder traversal
+    rt->l = build_Tree_from_Inorder_Preorder(inorder, preorder, instart, inorder_index-1);
+    rt->r= build_Tree_from_Inorder_Preorder(inorder, preorder, inorder_index+1,inend);
+
     return rt;
 }
 //print Ancenstor of given node
@@ -802,7 +964,7 @@ void verticalTraversal(node *rt)
 }
 int main()
 {
-    system("color B0");
+    // system("color B0");
     ll t,n;
     cin>>t;
     node *rt=NULL;
@@ -813,11 +975,7 @@ int main()
     }
     cout<<endl;
     normalInorder(rt);
-    //cin>>n;
-    cout<<endl;
-   verticalTraversal(rt);
-
-
-
-
+    cout<<"\n";
+    zig_Zag(rt);
+   
 }

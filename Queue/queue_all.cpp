@@ -9,7 +9,7 @@ using namespace std;
 //Q 11 given queue of integer and count k reverse first k
 void question11(queue<ll>&q,ll k)
 {
-    if(q.size()==0 || k>q.size())
+    if(q.size()==0 || k>q.size())//if q is empty or k more than queue size
         return ;
     else if(k>0)
     {
@@ -31,6 +31,17 @@ void question11(queue<ll>&q,ll k)
         }
     }
 }
+//Q9 Given a stack of integers, how do you check whether each successive pair of numbers in the stack is consecutive or not
+
+
+
+
+
+
+
+
+
+
 void display(queue<ll>q)
 {
     cout<<endl;
