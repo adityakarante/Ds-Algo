@@ -153,17 +153,28 @@ void stack_Preorder(node *rt)
 }
 
 //_______________________postOrder_______________________
-void stack_PostOrder(node *rt)//????????????????????????????????????????????
+void stack_PostOrder(node *root)
 {
-    if(rt==NULL)
+    if (!root)
         return;
-    stack<node*>s;
-    s.push(rt);
-    node *curr=rt;
-    while(curr!=NULL || s.empty()==false)
+    stack<node*> tmp, ans;
+    node *curr = root;
+    tmp.push(curr);
+    while (tmp.empty() == false)
     {
-
-
+        curr = tmp.top();
+        tmp.pop();
+        ans.push(curr);
+        if (curr->l)
+            tmp.push(curr->l);
+        if (curr->r)
+            tmp.push(curr->r);
+    }
+    while (ans.empty() == false)
+    {
+        curr = ans.top();
+        cout << curr->data << " ";
+        ans.pop();
     }
 }
 void normal_PostOrder(node *rt)
@@ -198,8 +209,8 @@ int max_Element(node *rt)
 }
 //_________________________Zig and Zag traversal___________________
 //use 2 stacks for storing alternate levels
-//for 1st stack store left child 1st then right child
-//for 2nd stack store right child 1st then left child
+//for 1st stack store right child 1st then left child
+//for 2nd stack store left child 1st then right child
 void zig_Zag(node *rt)
 {
     if(!rt)
@@ -437,7 +448,7 @@ void deep_Node(node *rt)
     //deepest node is last node in level Order traversal
     cout<<endl<<"Deep node: "<<tmp->data;
 }
-//Delete node in binary tree ??????????????
+//Delete node in binary tree 
 //find deppest node  and replace data of node to be deleted with deepest ndoe 
 //delete deepest node
 void delete_Node(node **rt,ll key)
@@ -498,12 +509,6 @@ void delete_Node(node **rt,ll key)
                 q.push(curr->r);
         }
     }
-
-
-
-    
-
-
 }
 //Count of full nodes without recursion
 //The set of all nodes with both left and right children are called full nodes.
@@ -629,7 +634,7 @@ ll level_That_Has_Max_Sum(node *rt)
     return ans;
 }
 
-//print all root-leaf paths  ??????????????????????????????????????????????????????????
+//print all root-leaf paths  
 void printVector(vector<ll>&v)
 {
     cout<<endl;
@@ -638,7 +643,7 @@ void printVector(vector<ll>&v)
         cout<<"[ "<<v[i]<<" ]=>";
     cout<<"[ NULL ]";
 
-    //removing that node
+    //removing that leaf node
     v.pop_back();
 
 }
@@ -962,6 +967,128 @@ void verticalTraversal(node *rt)
      }
 
 }
+//Check if binary tree is BST or not
+//pass min as INT_MIN and max as INT_MAX
+bool checkBST(node *rt,ll min,ll max)
+{
+    if(rt==NULL)
+        return true;
+
+    //for each node check if more than min and less than max
+    if(rt->data<min || rt->data>max)
+        return false;
+
+    return checkBST(rt->l,min,rt->data-1) && checkBST(rt->r,rt->data+1,max);
+}
+//______________remove all half nodes from tree_____________
+node* reomve_Half_Node(node *rt)
+{
+    if(!rt)
+        return NULL;
+    rt->l=reomve_Half_Node(rt->l);
+    rt->r=reomve_Half_Node(rt->r);
+
+    if(rt->l==NULL && rt->l==NULL)//if root node
+        return rt;
+    if (rt->l==NULL)//if only  so half node so retrun roots right child
+        return rt->r;
+    if (rt->r == NULL) //if only so half node so retrun roots left child
+        return rt->l;
+    return rt;
+    
+}
+//________________remove leaves_______________
+//Time Complexity: O(n).
+node *remove_Leaves(node *rt)
+{
+    if(rt==NULL)
+        return NULL;
+    if(rt->l==NULL && rt->r==NULL)//delete leaf and return null
+    {
+        delete rt;
+        return NULL;
+    }
+    rt->l=remove_Leaves(rt->l);
+    rt->r=remove_Leaves(rt->r); 
+
+    return rt;
+}
+//_____________________Max_Path_Sum_________________
+ll max_Path_Sum(node *rt)//?????????????
+{
+    return 0;
+}
+
+//_______________________LCA________________________
+//find lowest common ancenstor  of 2 nodes
+node* LCA(node *rt,node *first,node *second)
+{
+    if(rt==NULL)
+        return rt;
+    if(rt==first || rt==second )//if any node match then return that node
+        return rt;
+    
+    node* tmpleft=LCA(rt->l,first,second);
+    node* tmpright=LCA(rt->r,first,second);
+
+    //if we get nodes both from left and right side so this is LCA
+    if(tmpleft && tmpright)
+        return rt;
+    else
+        return tmpleft ? tmpleft : tmpright;
+}
+//_____________________check binary tree is complete or not____________________
+//so last node that we visit should be null and after that we get any other node then it is false
+/*
+When we get NULL node 1st time set complete to 0 and if after that we not get
+any  node then again we set complete to 1 and break if not found after that null node 
+means that is last node so return true
+*/
+bool isComplete(node *rt)
+{
+    //empty or if contain only single
+    if(!rt || (!rt->l && !rt->r))
+        return true;
+    queue<node*>q;
+    node *curr;
+    q.push(rt);
+    int complete=1;
+    while(!q.empty())
+    {
+        curr=q.front();
+        q.pop();
+        if(curr->l)
+        {   
+            if(complete)
+                q.push(curr->l);
+            else
+            {
+                complete=1;
+                break;
+            }
+                
+        }
+        else
+            complete=0;
+        if(curr->r)
+        {
+            if(complete)
+                q.push(curr->r);
+            else
+            {
+                complete=1;
+                break;
+            }
+                
+        }
+        else 
+            complete=0;
+    }
+    if(!complete)
+        return true;
+    return false;
+}
+
 int main()
 {
     // system("color B0");
@@ -976,6 +1103,5 @@ int main()
     cout<<endl;
     normalInorder(rt);
     cout<<"\n";
-    zig_Zag(rt);
-   
+    cout<<"Complete:"<<isComplete(rt);
 }
